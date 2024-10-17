@@ -16,6 +16,7 @@ const TabNavigator = () => {
   return (
     <Tab.Navigator
       screenOptions={({route}) => ({
+        headerShown: false,
         tabBarIcon: ({focused, color, size}) => {
           if (route.name === 'Travel') {
             return <TravelIcon focused={focused} color={color} size={size} />;

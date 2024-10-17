@@ -21,3 +21,29 @@ export type LoginResult = {
   data?: any;
   error?: string;
 };
+
+export type TravelState = {
+  travelData: any[];
+  setTravelData: (data: any[]) => void;
+};
+
+export type HeaderProps = {
+  title: string;
+  onNotificationPress?: () => void;
+};
+
+export type SearchBarProps = {
+  onSearchChange?: (text: string) => void;
+  onMicPress?: () => void;
+  onFilterPress?: () => void;
+};
+
+export type TravelItem = {
+  id: string;
+  code: string;
+  typeOfTravel: {name: string};
+  reasonForTravel: {name: string};
+  bookingFor: {name: string};
+  requestStatus: {name: string};
+  requestDate: string;
+};

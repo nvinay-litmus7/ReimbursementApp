@@ -1,4 +1,4 @@
-import axios, {AxiosInstance, AxiosResponse, AxiosError} from 'axios';
+import axios, {AxiosInstance, AxiosResponse} from 'axios';
 import {
   AuthConfiguration,
   authorize,
@@ -13,7 +13,6 @@ import {
   MICROSOFT_TENANT_ID,
 } from '@env';
 import {LoginResult} from '@constants/types';
-import {navigate} from '@navigations/navigationRef';
 
 // Create a new QueryClient
 export const queryClient = new QueryClient();
@@ -38,30 +37,11 @@ const config: AuthConfiguration = {
 // Create an axios instance
 const api: AxiosInstance = axios.create({
   baseURL: BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  },
 });
-
-// Add a request interceptor to include the access token
-api.interceptors.request.use(
-  config => {
-    const {accessToken} = useAuthStore.getState();
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
-    }
-    return config;
-  },
-  (error: AxiosError) => Promise.reject(error),
-);
-
-api.interceptors.response.use(
-  (response: AxiosResponse) => response,
-  async (error: AxiosError) => {
-    if (error.response?.status === 401) {
-      await useAuthStore.getState().clearTokens();
-      navigate('Login');
-    }
-    return Promise.reject(error);
-  },
-);
 
 export const loginWithMicrosoft = async (): Promise<LoginResult> => {
   try {
@@ -78,34 +58,32 @@ export const loginWithMicrosoft = async (): Promise<LoginResult> => {
   }
 };
 
-export const get = async <T>(url: string, params?: any): Promise<T> => {
-  try {
-    const response: AxiosResponse<T> = await api.get(url, {params});
-    return response.data;
-  } catch (error) {
-    console.error(`GET request to ${url} failed:`, error);
-    throw error;
+// Function to set the auth token from the store
+const setAuthTokenFromStore = () => {
+  const {accessToken} = useAuthStore.getState();
+  if (accessToken) {
+    api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
+  } else {
+    delete api.defaults.headers.common.Authorization;
   }
 };
 
-export const post = async <T>(url: string, data?: any): Promise<T> => {
-  try {
-    const response: AxiosResponse<T> = await api.post(url, data);
-    return response.data;
-  } catch (error) {
-    console.error(`POST request to ${url} failed:`, error);
-    throw error;
-  }
+export const getRequest = async <T>(url: string, params?: any): Promise<T> => {
+  setAuthTokenFromStore();
+  const response: AxiosResponse<T> = await api.get(url, {params});
+  return response.data;
 };
 
-export const put = async <T>(url: string, data?: any): Promise<T> => {
-  try {
-    const response: AxiosResponse<T> = await api.put(url, data);
-    return response.data;
-  } catch (error) {
-    console.error(`PUT request to ${url} failed:`, error);
-    throw error;
-  }
+export const postRequest = async <T>(url: string, data?: any): Promise<T> => {
+  setAuthTokenFromStore();
+  const response: AxiosResponse<T> = await api.post(url, data);
+  return response.data;
+};
+
+export const putRequest = async <T>(url: string, data?: any): Promise<T> => {
+  setAuthTokenFromStore();
+  const response: AxiosResponse<T> = await api.put(url, data);
+  return response.data;
 };
 
 // Add more methods for DELETE, etc. as needed

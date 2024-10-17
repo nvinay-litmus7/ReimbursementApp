@@ -3,7 +3,9 @@ import * as Keychain from 'react-native-keychain';
 import {AuthState} from '@constants/types';
 
 const useAuthStore = create<AuthState>(set => ({
-  accessToken: null,
+  // accessToken: null,
+  accessToken:
+    '691167a41d26bbf67e9ac1aa4c50b9201be8e781d26aa9f449e1f9a51daf71b1',
   setTokens: async (accessToken: string) => {
     try {
       await Keychain.setGenericPassword('accessToken', accessToken);
